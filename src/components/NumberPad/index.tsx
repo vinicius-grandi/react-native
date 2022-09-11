@@ -20,7 +20,7 @@ function NumberPad({
     <TextInput
       keyboardType="number-pad"
       style={styles.textbox}
-      onChangeText={(t) => handler(Number(t))}
+      onChangeText={(t) => handler(Number(t.replace(',', '.')))}
       placeholder={placeholder}
     />
   );

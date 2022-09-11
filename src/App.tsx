@@ -4,13 +4,14 @@ import {
   Text,
   View,
 } from 'react-native';
-import Main from './src/components/Main';
-import { styles as imStyles } from './src/components/Form';
+import { registerRootComponent } from 'expo';
+import Main from './components/Main';
+import { styles as imStyles } from './components/Form';
 
 export const styles = StyleSheet.create({
   container: {
-    flex: 0.5,
     fontSize: '50px',
+    flex: 0.9,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
@@ -19,8 +20,8 @@ export const styles = StyleSheet.create({
     height: '100%',
   },
   main: {
-    backgroundColor: '#e6e6e6',
     flex: 1,
+    backgroundColor: '#e6e6e6',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -36,3 +37,5 @@ export default function App() {
     </View>
   );
 }
+
+registerRootComponent(App);
