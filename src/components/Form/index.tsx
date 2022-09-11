@@ -52,7 +52,7 @@ function Form() {
       <View style={{ margin: 10 }}>
         <Button
           title="Calcular"
-          color="#e21538"
+          color="#e21537"
           onPress={() => {
             setRes(person.calculateBmi());
           }}

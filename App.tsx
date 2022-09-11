@@ -4,9 +4,8 @@ import {
   Text,
   View,
 } from 'react-native';
-import { registerRootComponent } from 'expo';
-import Main from './components/Main';
-import { styles as imStyles } from './components/Form';
+import Main from './src/components/Main';
+import { styles as imStyles } from './src/components/Form';
 
 export const styles = StyleSheet.create({
   container: {
@@ -37,5 +36,3 @@ export default function App() {
     </View>
   );
 }
-
-registerRootComponent(App);
