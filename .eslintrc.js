@@ -30,7 +30,6 @@ module.exports = {
           jsx: 'never',
           tsx: 'never',
           ts: 'never',
-        json: 'never',
         },
       },
     ],

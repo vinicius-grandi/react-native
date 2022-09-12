@@ -9,7 +9,7 @@ describe('App', () => {
     fireEvent.changeText(inputItem, taskName);
     fireEvent.press(screen.getByText('create task'));
 
-    expect(screen.getByRole('listitem')).toHaveTextContent(taskName);
+    expect(screen.getByRole('menuitem')).toHaveTextContent(taskName);
   });
   it('allows you to delete the selected task or move it above or below each other', () => {
     render(<App />);
@@ -23,13 +23,13 @@ describe('App', () => {
     fireEvent.changeText(inputItem, 'another task');
     fireEvent.press(createTask);
 
-    const item = screen.getByRole('listitem');
+    const [item] = screen.getAllByRole('menuitem');
 
     // selecting task and moving it
     fireEvent.press(item);
-    fireEvent.press(screen.getByText('move item below'));
+    fireEvent.press(screen.getByText('move item down'));
 
-    const allItems = screen.getAllByRole('listItem');
+    const allItems = screen.getAllByRole('menuitem');
 
     // checking if item has been moved
     expect(allItems[0]).not.toEqual(item);
@@ -54,11 +54,11 @@ describe('App', () => {
     fireEvent.changeText(inputItem, taskName);
     fireEvent.press(createTask);
 
-    expect(screen.getAllByRole('listitem').length).toBe(2);
+    expect(screen.getAllByRole('menuitem').length).toBe(2);
 
     fireEvent.press(screen.getByText('remove all tasks'));
 
-    expect(screen.getAllByRole('listitem').length).toBe(0);
+    expect(screen.queryAllByRole('menuitem').length).toBe(0);
   });
   it('allows you to mark a task as done with a long press on it and you can remove all completed tasks', () => {
     render(<App />);
@@ -76,6 +76,6 @@ describe('App', () => {
 
     fireEvent.press(screen.getByText('remove all completed tasks'));
 
-    expect(screen.getAllByRole('listitem').length).toBe(0);
+    expect(screen.queryAllByRole('menuitem').length).toBe(0);
   });
 });
