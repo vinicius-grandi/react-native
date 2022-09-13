@@ -1,5 +1,5 @@
-import { Text } from 'react-native';
+import Chat from './Chat';
 
 export default function Main() {
-  return <Text>main</Text>;
+  return <Chat />;
 }
