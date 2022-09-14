@@ -1,7 +1,36 @@
-import { Text, View } from 'react-native';
+import {
+  Text,
+  TextInput,
+  View,
+  Button,
+  FlatList,
+} from 'react-native';
 import { useEffect, useState } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, onValue } from 'firebase/database';
+import {
+  getDatabase,
+  ref,
+  child,
+  set,
+  push,
+  get,
+  onChildAdded,
+  DataSnapshot,
+} from 'firebase/database';
+
+type Messages = {
+  username: string;
+  message: string;
+};
+
+function Item({ message, username }: Messages) {
+  return (
+    <View>
+      <Text>{username}</Text>
+      <Text>{message}</Text>
+    </View>
+  );
+}
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDE6K_eS2vGcPP6MkJgK2_ZblKb_9EBua4',
@@ -14,23 +43,61 @@ const firebaseConfig = {
   measurementId: 'G-3L9PCJBCX4',
 };
 
-const app = initializeApp(firebaseConfig);
-const dbRef = ref(getDatabase(), 'user');
+initializeApp(firebaseConfig);
+const dbRef = ref(getDatabase(), 'messages');
 
 export default function Chat() {
-  const [val, setVal] = useState('teste');
+  const [message, setMessage] = useState('');
+  const [username, setUsername] = useState('');
+  const [initialMessages, setInitialMessages] = useState<Messages[]>([]);
+  const [currMessages, setCurrMessages] = useState<Messages[]>([]);
+
   useEffect(() => {
-    try {
-      onValue(dbRef, (snapshot) => {
-        console.log(snapshot.toJSON());
+    if (initialMessages.length > 1) {
+      onChildAdded(dbRef, (dc) => {
+        const val = dc.val();
+        setCurrMessages([...initialMessages, {
+          username: val.username,
+          message: val.message,
+        }]);
       });
-    } catch (error) {
-      console.error(error);
+    } else {
+      const fn = (d: DataSnapshot) => {
+        const msgs: Messages[] = [];
+        d.forEach((dc) => {
+          const val = dc.val();
+          msgs.push({
+            username: val.username,
+            message: val.message,
+          });
+        });
+        setInitialMessages(msgs);
+      };
+      get(child(dbRef, '/')).then(fn);
     }
-  }, []);
+  }, [initialMessages]);
+
+  const renderItem = ({ item }: { item: Messages }) => (
+    <Item message={item.message} username={item.username} />
+  );
+
   return (
     <View>
-      <Text>{val}</Text>
+      <FlatList data={currMessages} renderItem={renderItem} />
+      <Text>Username</Text>
+      <TextInput onChangeText={(t) => setUsername(t)} value={username} />
+      <Text>Message</Text>
+      <TextInput onChangeText={(t) => setMessage(t)} value={message} />
+      <Button
+        title="Send Message"
+        onPress={() => {
+          const newMessageRef = push(dbRef);
+          set(newMessageRef, {
+            username,
+            message,
+          });
+        }}
+      />
     </View>
   );
 }
