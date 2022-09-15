@@ -8,9 +8,10 @@ import Main from './src/components/Main';
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     padding: 10,
+    flex: 1,
+    maxHeight: '100vh',
   },
 });
 

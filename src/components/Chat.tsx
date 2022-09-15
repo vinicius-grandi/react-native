@@ -4,16 +4,15 @@ import {
   View,
   Button,
   FlatList,
+  StyleSheet,
 } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { initializeApp } from 'firebase/app';
 import {
   getDatabase,
   ref,
-  child,
   set,
   push,
-  get,
   onChildAdded,
   DataSnapshot,
 } from 'firebase/database';
@@ -23,11 +22,37 @@ type Messages = {
   message: string;
 };
 
+const styles = StyleSheet.create({
+  username: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#ff3e3e',
+    alignSelf: 'flex-start',
+  },
+  message: {
+    fontSize: 18,
+  },
+  line: {
+    flexBasis: '100%',
+    borderBottomWidth: 1,
+  },
+  list: {
+    backgroundColor: '#f5f5f5',
+    padding: 10,
+    height: 500,
+    maxHeight: 500,
+  },
+  input: {
+    borderWidth: 1,
+    padding: 5,
+  },
+});
+
 function Item({ message, username }: Messages) {
   return (
-    <View>
-      <Text>{username}</Text>
-      <Text>{message}</Text>
+    <View style={styles.line}>
+      <Text style={styles.username}>{username}</Text>
+      <Text style={styles.message}>{message}</Text>
     </View>
   );
 }
@@ -49,45 +74,59 @@ const dbRef = ref(getDatabase(), 'messages');
 export default function Chat() {
   const [message, setMessage] = useState('');
   const [username, setUsername] = useState('');
-  const [initialMessages, setInitialMessages] = useState<Messages[]>([]);
   const [currMessages, setCurrMessages] = useState<Messages[]>([]);
+  const [showScrollToEnd, setShowScrollToEnd] = useState(false);
+  const listRef = useRef<FlatList<Messages>>(null);
 
   useEffect(() => {
-    if (initialMessages.length > 1) {
-      onChildAdded(dbRef, (dc) => {
-        const val = dc.val();
-        setCurrMessages([...initialMessages, {
-          username: val.username,
-          message: val.message,
-        }]);
+    const msgArr: Messages[] = [];
+    const fn = (dc: DataSnapshot) => {
+      const val = dc.val();
+      msgArr.push({
+        username: val.username,
+        message: val.message,
       });
-    } else {
-      const fn = (d: DataSnapshot) => {
-        const msgs: Messages[] = [];
-        d.forEach((dc) => {
-          const val = dc.val();
-          msgs.push({
-            username: val.username,
-            message: val.message,
-          });
-        });
-        setInitialMessages(msgs);
-      };
-      get(child(dbRef, '/')).then(fn);
-    }
-  }, [initialMessages]);
+      setCurrMessages([...currMessages, ...msgArr]);
+      setShowScrollToEnd(true);
+    };
+    onChildAdded(dbRef, fn);
+  }, []);
 
   const renderItem = ({ item }: { item: Messages }) => (
     <Item message={item.message} username={item.username} />
   );
 
   return (
-    <View>
-      <FlatList data={currMessages} renderItem={renderItem} />
-      <Text>Username</Text>
-      <TextInput onChangeText={(t) => setUsername(t)} value={username} />
-      <Text>Message</Text>
-      <TextInput onChangeText={(t) => setMessage(t)} value={message} />
+    <View style={{ flex: 1 }}>
+      <View>
+        <FlatList
+          data={currMessages}
+          renderItem={renderItem}
+          style={styles.list}
+          contentContainerStyle={{ flex: 0.1 }}
+          ref={listRef}
+        />
+        {showScrollToEnd && (
+          <Button
+            title="↓"
+            color="#a0ff74"
+            onPress={() => {
+              listRef.current?.scrollToEnd();
+              setShowScrollToEnd(false);
+            }}
+          />
+        )}
+      </View>
+      <View style={{ flex: 1, justifyContent: 'center' }}>
+        <View style={{ padding: 10 }}>
+          <Text>Username</Text>
+          <TextInput onChangeText={(t) => setUsername(t)} value={username} style={styles.input} />
+        </View>
+        <View style={{ padding: 10 }}>
+          <Text>Message</Text>
+          <TextInput onChangeText={(t) => setMessage(t)} value={message} style={styles.input} />
+        </View>
+      </View>
       <Button
         title="Send Message"
         onPress={() => {
