@@ -103,6 +103,7 @@ export default function Chat() {
           data={currMessages}
           renderItem={renderItem}
           style={styles.list}
+          // contentContainerStyle attribute is used for positioning the list
           contentContainerStyle={{ flex: 0.1 }}
           ref={listRef}
         />
@@ -111,6 +112,7 @@ export default function Chat() {
             title="↓"
             color="#a0ff74"
             onPress={() => {
+              // FlatList.
               listRef.current?.scrollToEnd();
               setShowScrollToEnd(false);
             }}
