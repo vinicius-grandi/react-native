@@ -3,7 +3,9 @@ import {
   TextInput,
   View,
   Button,
+  KeyboardAvoidingView,
   FlatList,
+  ScrollView,
   StyleSheet,
 } from 'react-native';
 import { useEffect, useRef, useState } from 'react';
@@ -38,9 +40,8 @@ const styles = StyleSheet.create({
   },
   list: {
     backgroundColor: '#f5f5f5',
-    padding: 10,
-    height: 500,
-    maxHeight: 500,
+    height: '55%',
+    maxHeight: '55%',
   },
   input: {
     borderWidth: 1,
@@ -68,8 +69,9 @@ const firebaseConfig = {
   measurementId: 'G-3L9PCJBCX4',
 };
 
-initializeApp(firebaseConfig);
-const dbRef = ref(getDatabase(), 'messages');
+const app = initializeApp(firebaseConfig);
+
+const dbRef = ref(getDatabase(app), 'messages');
 
 export default function Chat() {
   const [message, setMessage] = useState('');
@@ -86,7 +88,7 @@ export default function Chat() {
         username: val.username,
         message: val.message,
       });
-      setCurrMessages([...currMessages, ...msgArr]);
+      setCurrMessages(msgArr);
       setShowScrollToEnd(true);
     };
     onChildAdded(dbRef, fn);
@@ -97,14 +99,13 @@ export default function Chat() {
   );
 
   return (
-    <View style={{ flex: 1 }}>
+    <View>
       <View>
         <FlatList
           data={currMessages}
           renderItem={renderItem}
           style={styles.list}
           // contentContainerStyle attribute is used for positioning the list
-          contentContainerStyle={{ flex: 0.1 }}
           ref={listRef}
         />
         {showScrollToEnd && (
@@ -119,16 +120,31 @@ export default function Chat() {
           />
         )}
       </View>
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        <View style={{ padding: 10 }}>
+      <ScrollView
+        keyboardShouldPersistTaps="always"
+        style={{
+          elevation: 10,
+          backgroundColor: '#fff',
+        }}
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
+        <View style={{ padding: 10, backgroundColor: '#fff' }}>
           <Text>Username</Text>
-          <TextInput onChangeText={(t) => setUsername(t)} value={username} style={styles.input} />
+          <TextInput
+            onChangeText={(t) => setUsername(t)}
+            value={username}
+            style={styles.input}
+          />
         </View>
-        <View style={{ padding: 10 }}>
+        <View style={{ padding: 10, backgroundColor: '#fff', elevation: 1 }}>
           <Text>Message</Text>
-          <TextInput onChangeText={(t) => setMessage(t)} value={message} style={styles.input} />
+          <TextInput
+            onChangeText={(t) => setMessage(t)}
+            value={message}
+            style={styles.input}
+          />
         </View>
-      </View>
+      </ScrollView>
       <Button
         title="Send Message"
         onPress={() => {
@@ -139,6 +155,7 @@ export default function Chat() {
           });
         }}
       />
+      <KeyboardAvoidingView behavior="height" keyboardVerticalOffset={-200} />
     </View>
   );
 }
